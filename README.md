@@ -1,8 +1,3 @@
-# Volunteer Project Management Database
-
-This database is designed to help organizations like Digital Aid Seattle manage volunteer-led projects more effectively. The schema includes five main tables: `Client`, `Volunteer`, `Project`, `Task`, and `Time_Log`. These entities track client details, volunteer skills, project descriptions, assigned tasks, and logged hours. Relationships are set with appropriate primary and foreign keys: each client can have multiple projects, each project can have multiple tasks, and each task can have multiple time log entries. Volunteers can be assigned to tasks and record time worked. 
-
-The design was created to meet functional requirements such as tracking project progress, managing task assignments, and producing reports for managers and clients. The EER diagram was generated using MySQL Workbench, and sample data (40 records per table) was inserted to allow for testing and demonstration. This structure ensures scalability, data integrity, and easy reporting for project management.
 
 📂 Volunteer Project Management Database
 
