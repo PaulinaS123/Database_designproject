@@ -2,6 +2,7 @@
 📂 Volunteer Project Management Database
 
 This project is a relational database system designed to help organizations like Digital Aid Seattle manage volunteer-led projects more effectively. It provides a structured way to track clients, volunteers, projects, tasks, and time logs, ensuring better coordination, reporting, and scalability.
+These entities track client details, volunteer skills, project descriptions, assigned tasks, and logged hours. Relationships are set with appropriate primary and foreign keys: each client can have multiple projects, each project can have multiple tasks, and each task can have multiple time log entries. Volunteers can be assigned to tasks and record time worked.
 
 📌 Purpose
 
