@@ -1,0 +1,92 @@
+# Volunteer Project Management Database
+
+This project involves the design, implementation, and testing of a relational database to manage volunteer activities. The database is designed to track volunteers, projects, tasks, and the time they spend on them.
+
+## Database Design
+
+The database schema consists of five main tables with clearly defined relationships to ensure data integrity and efficient data retrieval. The entities are:
+
+* `Client`: Manages information about the clients or organizations that the volunteers serve.
+* `Volunteer`: Stores details about each volunteer.
+* `Project`: Contains information on various projects, with a foreign key linking each project to a specific client.
+* `Task`: Breaks down projects into smaller, manageable tasks. Each task is assigned to a volunteer and is part of a specific project.
+* `Time_Log`: A log of the hours volunteers have worked on specific tasks.
+
+## Instructions on How to Run the SQL Script
+
+This project's database schema and sample data are contained in the `volunteer_project_management.sql` file. You can execute this script using a SQL command-line client or a graphical user interface (GUI) to set up and populate the database.
+
+### Prerequisites
+
+* A MySQL or MariaDB database server installed and running.
+* A user with appropriate permissions to create a database and tables.
+
+### Steps to Run the Script
+
+1.  **Open your SQL Client**: Open your preferred command-line tool (e.g., MySQL Shell, `mysql` command line) or a GUI tool (e.g., DBeaver, MySQL Workbench, or phpMyAdmin).
+
+2.  **Connect to the Database Server**: Connect to your local or remote database server using the credentials of a user with database creation privileges.
+
+3.  **Execute the Script**: Run the SQL script directly from your client. The script will automatically perform the following actions:
+    * Create the `volunteer_db` database.
+    * Switch to the new database using `USE volunteer_db`.
+    * Drop and recreate all five tables.
+    * Insert the sample data into each table.
+    * Create the views and execute the sample queries.
+
+    **Example for a command-line interface:**
+    ```bash
+    mysql -u [your_username] -p < volunteer_project_management.sql
+    ```
+    (You will be prompted to enter your password after running this command.)
+
+4.  **Verify the Setup**: After the script finishes, you can check that the database was created correctly by running a simple query in your SQL client, such as:
+    ```sql
+    USE volunteer_db;
+    SHOW TABLES;
+    ```
+
+## Key Queries and Their Purposes
+
+This section demonstrates the database's functionality with a few key queries.
+
+1.  **Volunteer-Task Assignment:**
+    * **Purpose**: This query retrieves a list of all assigned tasks and the name of the volunteer responsible for each, demonstrating the one-to-one relationship between a task and a volunteer.
+    * **Query**:
+        ```sql
+        SELECT
+          t.title AS TaskTitle,
+          v.name AS VolunteerName
+        FROM Task AS t
+        JOIN Volunteer AS v
+          ON t.assigned_to = v.volunteer_id;
+        ```
+
+2.  **Total Volunteer Hours:**
+    * **Purpose**: This query calculates the total hours worked by each volunteer. It demonstrates the use of an aggregate function (`SUM`) and grouping (`GROUP BY`) to summarize data.
+    * **Query**:
+        ```sql
+        SELECT
+          v.name AS volunteerName,
+          SUM(tl.hours_worked) AS TotalHours
+        FROM Volunteer AS v
+        JOIN Time_Log AS tl
+          ON v.volunteer_id = tl.volunteer_id
+        GROUP BY
+          v.name
+        ORDER BY
+          TotalHours DESC;
+        ```
+
+3.  **Project Details with Client Information:**
+    * **Purpose**: This query joins `Project` and `Client` tables to provide a comprehensive view of each project along with its associated client's name. This is useful for high-level reporting.
+    * **Query**:
+        ```sql
+        SELECT
+          p.name AS projectName,
+          c.name AS clientName,
+          p.status
+        FROM Project AS p
+        JOIN Client AS c
+          ON p.client_id = c.client_id;
+        ```
