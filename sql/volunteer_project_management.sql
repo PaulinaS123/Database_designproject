@@ -1,6 +1,7 @@
 CREATE DATABASE volunteer_db;
 USE volunteer_db;
 
+
 USE volunteer_db;
 
 SHOW TABLES;
@@ -64,6 +65,109 @@ CREATE TABLE Time_Log (
   FOREIGN KEY (volunteer_id) REFERENCES Volunteer(volunteer_id) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (task_id) REFERENCES Task(task_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 1. Example Queries (joining two or more tables)
+
+-- Query 1 (Volunteers and their Assigned Tasks):
+
+-- Find the names of all volunteers and the tasks they are assigned to.
+SELECT v.name AS volunteer_name, t.title AS task_title
+FROM Volunteer v
+JOIN Task t ON v.volunteer_id = t.assigned_to;
+
+-- Query 2 (Projects with Client Information):
+
+-- Get a list of all projects and the names of their clients.
+SELECT p.name AS project_name, c.name AS client_name
+FROM Project p
+JOIN Client c ON p.client_id = c.client_id;
+
+-- Query 3 (Total Hours Worked Per Volunteer):
+
+-- Calculate the total hours worked for each volunteer.
+SELECT v.name, SUM(tl.hours_worked) AS total_hours
+FROM Volunteer v
+JOIN Time_Log tl ON v.volunteer_id = tl.volunteer_id
+GROUP BY v.name
+ORDER BY total_hours DESC;
+
+-- Query 4 (Tasks for a Specific Project):
+
+-- This query retrieves a list of all assigned tasks and the name of the volunteer responsible for each, demonstrating the one-to-one relationship between a task and a volunteer.
+SELECT
+  t.title AS TaskTitle,
+  v.name AS VolunteerName
+FROM Task AS t
+JOIN Volunteer AS v
+  ON t.assigned_to = v.volunteer_id;
+  
+  -- Query 5: Total hours worked per project, grouped by volunteer
+SELECT 
+    p.name AS project_name,
+    v.name AS volunteer_name,
+    SUM(tl.hours_worked) AS total_hours
+FROM Project p
+JOIN Task t ON p.project_id = t.project_id
+JOIN Time_Log tl ON t.task_id = tl.task_id
+JOIN Volunteer v ON tl.volunteer_id = v.volunteer_id
+GROUP BY p.name, v.name
+ORDER BY p.name, total_hours DESC;
+
+
+-- 2. Example Views
+
+-- View 1 (Project and Client Details): This view would combine project and client information, which is useful for reporting.
+CREATE VIEW Project_Client_Details AS
+SELECT p.project_id, p.name AS project_name, p.status, c.name AS client_name, c.contact_info
+FROM Project p
+JOIN Client c ON p.client_id = c.client_id;
+
+-- View 2 (Volunteer Time Summary): This view would summarize the total hours each volunteer has logged.
+CREATE VIEW Volunteer_Time_Summary AS
+SELECT v.name AS volunteer_name, SUM(tl.hours_worked) AS total_hours_logged
+FROM Volunteer v
+JOIN Time_Log tl ON v.volunteer_id = tl.volunteer_id
+GROUP BY v.name;
+
+-- View 3: Overdue Tasks
+CREATE VIEW Overdue_Tasks AS
+SELECT 
+    t.title AS task_title,
+    t.due_date,
+    t.status,
+    v.name AS assigned_volunteer,
+    p.name AS project_name
+FROM Task t
+JOIN Volunteer v ON t.assigned_to = v.volunteer_id
+JOIN Project p ON t.project_id = p.project_id
+WHERE t.due_date < CURDATE() AND t.status != 'Completed';
+
+
+-- Make volunteer emails unique
+ALTER TABLE Volunteer
+ADD CONSTRAINT uq_volunteer_email UNIQUE (email);
+
+-- Restrict volunteer roles to known values
+ALTER TABLE Volunteer
+MODIFY role ENUM('Developer','UX Designer','Data Analyst','Project Manager') NOT NULL;
+
+-- Restrict project status
+ALTER TABLE Project
+MODIFY status ENUM('Planned','In Progress','Completed','Not Started') NOT NULL;
+
+-- Restrict task status
+ALTER TABLE Task
+MODIFY status ENUM('Planned','In Progress','Completed','Not Started') NOT NULL;
+
+-- Ensure hours worked is positive
+ALTER TABLE Time_Log
+ADD CONSTRAINT chk_hours_positive CHECK (hours_worked > 0);
+
+CREATE INDEX idx_project_client ON Project(client_id);
+CREATE INDEX idx_task_project ON Task(project_id);
+CREATE INDEX idx_task_assigned ON Task(assigned_to);
+CREATE INDEX idx_time_log_volunteer ON Time_Log(volunteer_id);
+CREATE INDEX idx_time_log_task ON Time_Log(task_id);
 
 
 -- Inserting data into Client
